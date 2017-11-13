@@ -1,6 +1,7 @@
+#define _GNU_SOURCE
 #include "utils.h"
 
-#define _GNU_SOURCE
+//#define _GNU_SOURCE
 #include <stdlib.h>
 #include <string.h>
 
