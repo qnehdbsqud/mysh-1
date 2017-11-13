@@ -89,10 +89,10 @@ for(int i = 0;i<n_commands;i++){
 			strcpy(server_addr.sun_path, FILE_SERVER);
 	
 			while(-1==connect(client_sock, (struct sockaddr*)&server_addr,sizeof(server_addr))){
-				fprintf(stderr,"client connect error\n");
+
 				sleep(2);
 			}
-			fprintf(stderr,"client connect success\n");		
+					
 			temp_out = dup(1);
 			dup2(client_sock,1);
 
