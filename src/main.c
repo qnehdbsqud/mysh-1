@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
+#include "signal_handlers.h"
 #include "commands.h"
 #include "built_in.h"
 #include "utils.h"
@@ -11,6 +13,8 @@ int main()
   char buf[8096];
 
   while (1) {
+signal(SIGINT,catch_sigint);
+signal(SIGTSTP,catch_sigtstp);
     fgets(buf, 8096, stdin);
 
     struct single_command commands[512];
@@ -21,7 +25,7 @@ int main()
 
     free_commands(n_commands, &commands);
     n_commands = 0;
-
+strcpy(buf,"");
     if (ret == 1) {
       break;
     }

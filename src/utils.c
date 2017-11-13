@@ -47,7 +47,8 @@ void parse_single_command(const char* command,
   while (tok != NULL) {
     (*argv)[ti] = (char*)malloc(strlen(tok));
     strcpy((*argv)[ti], tok);
-
+	if(!strcmp((*argv)[ti],"~"))
+		strcpy((*argv)[ti],getenv("HOME"));
     ++ti;
 
     tok = strtok_r(NULL, " \n\t", &saveptr);
