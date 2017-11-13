@@ -15,6 +15,8 @@
 
 #define FILE_SERVER "/tmp/test_server"
 
+
+
 pid_t proc_create(struct single_command,int index_of_commands,int* result);
 void* server();
 
@@ -61,6 +63,15 @@ if(n_commands>1){
 	pthread_create(&server_thread,NULL,server,NULL);
 }
 for(int i = 0;i<n_commands;i++){
+if(!strcmp(com[i].argv[com[i].argc-1],"&")){
+	com[i].argv[com[i].argc-1]=NULL;
+	strcpy(background.bg_commands,"");
+	for(int j=0;j<com[i].argc-1;j++){
+		strcat(background.bg_commands,com[i].argv[j]);
+		strcat(background.bg_commands," ");
+	}
+	background.bg_int++;//bg:0 -> not bg, bg:1 -> background
+}
     int built_in_pos = is_built_in_command(com[i].argv[0]);
     if (built_in_pos != -1) {
       if (built_in_commands[built_in_pos].command_validate(com[i].argc, com[i].argv)) {
@@ -76,7 +87,7 @@ for(int i = 0;i<n_commands;i++){
     } else if (strcmp(com[i].argv[0], "exit") == 0) {
       return 1;
     } else {
-	if(n_commands>1&&i==0){
+	if(n_commands>1&&i==0){//IPC
 		pid2=fork();
 		if(!pid2){//child
 			client_sock = socket(PF_FILE, SOCK_STREAM,0);
@@ -123,6 +134,23 @@ for(int i = 0;i<n_commands;i++){
 	}
 }//if
   return 0;
+}
+
+void* bg_com()
+{
+	int status;
+	waitpid(background.bg_pid,&status,0);
+	background.bg_int=0;
+	if(WIFEXITED(status)){
+		printf("%d Done %s\n",background.bg_pid,background.bg_commands);
+	}
+	else if(WIFSIGNALED(status)){
+		if(6==WTERMSIG(status)){
+			printf("Exit %s\n",background.bg_commands);
+		}
+	}
+	
+	pthread_exit(0);
 }
 
 void* server()
@@ -188,7 +216,7 @@ pid_t proc_create(struct single_command exec_com,int index_command, int* result)
 		char exec_buf[4096];
 		strcpy(exec_buf,Env);
 		char* tok = strtok_r(exec_buf,":",&saveptr);
-
+		
 		while(tok != NULL){
 			char* temp = (char*)malloc(strlen(tok));
 			char* temp_m = (char*)malloc(strlen(exec_com.argv[0]));
@@ -207,11 +235,23 @@ pid_t proc_create(struct single_command exec_com,int index_command, int* result)
 		}
 		fprintf(stderr,"%s : command not found\n",exec_com.argv[0]);
 		*result = -1;
-		exit(1);
+		abort();
+//		exit(1);
 	}
 	
 	else{//parent
-		waitpid(pid1,&status,0);
-		return pid1;
+		if(background.bg_int==1){//background
+			background.bg_int++;
+			printf("%u\n",pid1);
+			background.bg_pid = pid1;
+			pthread_attr_t attr;
+			pthread_attr_init(&attr);
+			pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_JOINABLE);
+			pthread_create(&(background.bg_thread),NULL,bg_com,NULL);
+		}
+		else{
+			waitpid(pid1,&status,0);
+			return pid1;
+		}
 	}
 }
