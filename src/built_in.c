@@ -42,6 +42,7 @@ int status;
 	if(background.bg_int){//background
 //		pthread_join(background.bg_thread,(void**)&status);
 //		waitpid(background.bg_pid,&status,0);
+		background.fg_int = 1;
 		printf("%u running %s\n",background.bg_pid,background.bg_commands);
 		waitpid(background.bg_pid,&status,0);
 		background.bg_int=0;

@@ -70,6 +70,7 @@ if(!strcmp(com[i].argv[com[i].argc-1],"&")){
 		strcat(background.bg_commands,com[i].argv[j]);
 		strcat(background.bg_commands," ");
 	}
+	background.fg_int=0;
 	background.bg_int++;//bg:0 -> not bg, bg:1 -> background
 }
     int built_in_pos = is_built_in_command(com[i].argv[0]);
@@ -145,7 +146,9 @@ void* bg_com()
 	waitpid(background.bg_pid,&status,0);
 	background.bg_int=0;
 	if(WIFEXITED(status)){
-		printf("%d Done %s\n",background.bg_pid,background.bg_commands);
+		if(background.fg_int!=1){
+			printf("%d Done %s\n",background.bg_pid,background.bg_commands);
+		}
 	}
 	else if(WIFSIGNALED(status)){
 		if(6==WTERMSIG(status)){

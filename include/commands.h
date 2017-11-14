@@ -14,6 +14,7 @@ struct background_data{
 	pthread_t bg_thread;
 	char bg_commands[100];
 	int bg_int;
+	int fg_int;
 } background;
 
 int evaluate_command(int n_commands, struct single_command (*commands)[512]);
