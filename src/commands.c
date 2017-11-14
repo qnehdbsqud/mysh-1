@@ -105,7 +105,7 @@ if(!strcmp(com[i].argv[com[i].argc-1],"&")){
 	
 			while(-1==connect(client_sock, (struct sockaddr*)&server_addr,sizeof(server_addr))){
 
-				sleep(2);
+				//sleep(2);
 			}
 					
 			temp_out = dup(1);
