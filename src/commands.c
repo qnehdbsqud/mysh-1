@@ -75,6 +75,9 @@ if(!strcmp(com[i].argv[com[i].argc-1],"&")){
     int built_in_pos = is_built_in_command(com[i].argv[0]);
     if (built_in_pos != -1) {
       if (built_in_commands[built_in_pos].command_validate(com[i].argc, com[i].argv)) {
+	if(i>0){
+		dup2(temp_in,0);
+	}
         if (built_in_commands[built_in_pos].command_do(com[i].argc, com[i].argv) != 0) {
           fprintf(stderr, "%s: Error occurs\n", com[i].argv[0]);
         }
